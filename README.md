@@ -1,4 +1,4 @@
 haskell_study
 =============
 
-Code while studying Haskell
+Code while studying Haskell.
