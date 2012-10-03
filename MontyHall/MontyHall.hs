@@ -3,12 +3,12 @@ import Control.Monad
 import qualified Numeric.Probability.Distribution as Distribution
 import qualified Numeric.Probability.Transition as Transition
 
-data Door = A | B | C deriving (Show, Eq, Ord, Enum)
+data Door = A | B | C deriving (Eq, Ord, Enum, Show, Read)
 
 doors :: [Door]
 doors = [A .. C]
 
-data State = Doors {prize :: Door, chosen :: Door, opened :: Door} deriving (Show, Eq, Ord)
+data State = Doors {prize :: Door, chosen :: Door, opened :: Door} deriving (Eq, Ord, Show, Read)
 
 start :: State
 start = Doors {prize=u, chosen=u, opened=u} where u = undefined
@@ -33,7 +33,7 @@ stay = Transition.id
 game :: Strategy -> Transition.T Float State
 game s = foldl (>=>) Transition.id [hide, choose, open, s]
 
-data Outcome = Win | Lose deriving (Show, Eq, Ord, Enum)
+data Outcome = Win | Lose deriving (Eq, Ord, Enum, Show, Read)
 
 result :: State -> Outcome
 result s = if chosen s == prize s then Win else Lose
