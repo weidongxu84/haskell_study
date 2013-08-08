@@ -19,10 +19,14 @@ processGccLogByPattern inputFile outputFile patternFile = do
 
 parsePattern :: String -> [RegexPattern]
 parsePattern pattern =
--- TODO: read pattern from file
---    patterns = lines pattern
-    [RegexPattern RegexInclude "^.*: warning: .*$",
-     RegexPattern RegexExclude "^modules/.*$"]
+    map converToPattern patterns
+        where patterns = map (splitAt 2) (lines pattern)
+              converToPattern =
+                (\(action, regex) -> if action == "+ "
+                    then RegexPattern RegexInclude regex
+                    else if action == "- "
+                        then RegexPattern RegexExclude regex
+                        else RegexPattern RegexInclude "")
 
 processLineByPattern :: [String] -> [RegexPattern] -> [String]
 processLineByPattern lines patterns =
