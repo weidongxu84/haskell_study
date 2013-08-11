@@ -1,4 +1,5 @@
 import System.Environment
+import Data.List
 import Text.Regex.TDFA
 
 main = do
@@ -19,14 +20,11 @@ processGccLogByPattern inputFile outputFile patternFile = do
 
 parsePattern :: String -> [RegexPattern]
 parsePattern pattern =
-    map converToPattern patterns
+    map convertToPattern patterns
         where patterns = map (splitAt 2) (lines pattern)
-              converToPattern =
-                (\(action, regex) -> if action == "+ "
-                    then RegexPattern RegexInclude regex
-                    else if action == "- "
-                        then RegexPattern RegexExclude regex
-                        else RegexPattern RegexInclude "")
+              convertToPattern ("+ ", regex) = RegexPattern RegexInclude regex
+              convertToPattern ("- ", regex) = RegexPattern RegexExclude regex
+              convertToPattern (_, _) = RegexPattern RegexInclude ""
 
 processLineByPattern :: [String] -> [RegexPattern] -> [String]
 processLineByPattern lines patterns =
@@ -34,10 +32,7 @@ processLineByPattern lines patterns =
 
 filterByPattern :: String -> [RegexPattern] -> Bool
 filterByPattern line patterns =
-    foldl matchPattern True patterns
-        where matchPattern =
-                (\pass regexPattern -> if pass
-                    then if action regexPattern == RegexInclude
-                        then line =~ regex regexPattern
-                        else not (line =~ regex regexPattern)
-                    else False)
+    foldl' matchPattern True patterns
+        where matchPattern False _ = False
+              matchPattern True (RegexPattern RegexInclude regex) = line =~ regex
+              matchPattern True (RegexPattern RegexExclude regex) = not (line =~ regex)
