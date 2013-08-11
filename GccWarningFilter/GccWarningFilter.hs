@@ -24,7 +24,7 @@ parsePattern pattern =
         where patterns = map (splitAt 2) (lines pattern)
               convertToPattern ("+ ", regex) = RegexPattern RegexInclude regex
               convertToPattern ("- ", regex) = RegexPattern RegexExclude regex
-              convertToPattern (_, _) = RegexPattern RegexInclude ""
+              convertToPattern (_, _) = RegexPattern RegexInclude ".*"  -- Invalid pattern file format
 
 processLineByPattern :: [String] -> [RegexPattern] -> [String]
 processLineByPattern lines patterns =
