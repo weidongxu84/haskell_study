@@ -6,7 +6,7 @@ main = do
     args <- getArgs
     case args of
         [inputFile, outputFile, patternFile] -> processGccLogByPattern inputFile outputFile patternFile
-        _ -> putStrLn "Usage: GccWarningFilter GccLogFile FilteredWarningOutputFile FilterPatternFile"
+        _ -> putStrLn "Usage: gccWarningFilter GccLogFile FilteredWarningOutputFile FilterPatternFile"
 
 data RegexAction = RegexInclude | RegexExclude deriving (Show, Enum, Eq)
 data RegexPattern = RegexPattern { action :: RegexAction,
