@@ -11,10 +11,8 @@ main = do
 processFile :: String -> IO()
 processFile xmlFile = do
     runX(readDocument [withValidate no, withInputEncoding utf8] xmlFile
-         >>>
-         processChildren (deleteObsoleteTranslation `when` isElem)
-         >>>
-         writeDocument [withIndent yes, withOutputEncoding utf8] xmlFile)
+         >>> processChildren (deleteObsoleteTranslation `when` isElem)
+         >>> writeDocument [withIndent yes, withOutputEncoding utf8] xmlFile)
     return()
 
 deleteObsoleteTranslation :: IOSArrow XmlTree XmlTree
