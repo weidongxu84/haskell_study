@@ -1,3 +1,4 @@
+#!/usr/bin/runhaskell
 import System.Environment
 import Text.XML.HXT.Core
 
