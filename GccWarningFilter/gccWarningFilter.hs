@@ -1,8 +1,6 @@
 #!/usr/bin/runhaskell
 import System.Environment
 import System.IO
-import System.IO.Error
-import Control.Exception
 import Data.List
 import Text.Regex.TDFA
 
@@ -20,17 +18,11 @@ data RegexPattern = RegexPattern { action :: RegexAction,
 processGccLogByPattern :: String -> IO ()
 processGccLogByPattern patternFile = do
     patterns <- readFile patternFile
-    handleJust (\e -> if isEOFError e then Just () else Nothing)
-               (\e -> return ())
-               (processLineByPattern $ parsePattern patterns)
+    interact $ processLineByPattern $ parsePattern patterns
 
-processLineByPattern :: [RegexPattern] -> IO ()
-processLineByPattern patterns = do
-    line <- getLine
-    if filterByPattern line patterns
-    then putStrLn line
-    else return ()
-    processLineByPattern patterns
+processLineByPattern :: [RegexPattern] -> String -> String
+processLineByPattern patterns =
+    unlines . filter (flip filterByPattern patterns) . lines
 
 parsePattern :: String -> [RegexPattern]
 parsePattern pattern =
