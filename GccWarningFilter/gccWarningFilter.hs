@@ -1,23 +1,36 @@
 #!/usr/bin/runhaskell
 import System.Environment
+import System.IO
+import System.IO.Error
+import Control.Exception
 import Data.List
 import Text.Regex.TDFA
 
 main = do
     args <- getArgs
     case args of
-        [inputFile, outputFile, patternFile] -> processGccLogByPattern inputFile outputFile patternFile
-        _ -> putStrLn "Usage: gccWarningFilter GccLogFile FilteredWarningOutputFile FilterPatternFile"
+        [patternFile] -> processGccLogByPattern patternFile
+        _ -> putStrLn $ "Read from standard input, write to standard output.\n"
+                        ++ "Usage: gccWarningFilter FilterPatternFile"
 
 data RegexAction = RegexInclude | RegexExclude deriving (Show, Enum, Eq)
 data RegexPattern = RegexPattern { action :: RegexAction,
                                    regex :: String } deriving (Show)
 
-processGccLogByPattern :: String -> String -> String -> IO ()
-processGccLogByPattern inputFile outputFile patternFile = do
-    input <- readFile inputFile
-    pattern <- readFile patternFile
-    writeFile outputFile $ unlines $ processLineByPattern (lines input) (parsePattern pattern)
+processGccLogByPattern :: String -> IO ()
+processGccLogByPattern patternFile = do
+    patterns <- readFile patternFile
+    handleJust (\e -> if isEOFError e then Just () else Nothing)
+               (\e -> return ())
+               (processLineByPattern $ parsePattern patterns)
+
+processLineByPattern :: [RegexPattern] -> IO ()
+processLineByPattern patterns = do
+    line <- getLine
+    if filterByPattern line patterns
+    then putStrLn line
+    else return ()
+    processLineByPattern patterns
 
 parsePattern :: String -> [RegexPattern]
 parsePattern pattern =
@@ -26,10 +39,6 @@ parsePattern pattern =
               convertToPattern ("+ ", regex) = RegexPattern RegexInclude regex
               convertToPattern ("- ", regex) = RegexPattern RegexExclude regex
               convertToPattern (_, _) = RegexPattern RegexInclude ".*"  -- Invalid pattern file format
-
-processLineByPattern :: [String] -> [RegexPattern] -> [String]
-processLineByPattern lines patterns =
-    filter (flip filterByPattern patterns) lines
 
 filterByPattern :: String -> [RegexPattern] -> Bool
 filterByPattern line patterns =
