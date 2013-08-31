@@ -11,9 +11,9 @@ main = do
         _ -> putStrLn $ "Read from standard input, write to standard output.\n"
                         ++ "Usage: gccWarningFilter FilterPatternFile"
 
-data RegexAction = RegexInclude | RegexExclude deriving (Show, Enum, Eq)
+data RegexAction = RegexInclude | RegexExclude deriving (Show, Read, Eq)
 data RegexPattern = RegexPattern { action :: RegexAction,
-                                   regex :: String } deriving (Show)
+                                   regex :: String } deriving (Show, Read)
 
 processGccLogByPattern :: String -> IO ()
 processGccLogByPattern patternFile = do
